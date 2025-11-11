@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Productos para Motos</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --success-color: #27ae60;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .form-section, .list-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        .form-section h2, .list-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-delete {
+            background-color: var(--accent-color);
+            padding: 6px 12px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        
+        .product-list {
+            margin-top: 20px;
+        }
+        
+        .product-item {
+            display: flex;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            transition: transform 0.2s;
+            gap: 15px;
+        }
+        
+        .product-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .product-details {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .product-models {
+            color: #3498db;
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        
+        .product-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 30px;
+            font-style: italic;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+        }
+        
+        .models-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px dashed #ddd;
+            padding: 5px;
+            display: none;
+        }
+        
+        .image-preview.active {
+            display: block;
+        }
+        
+        /* Modal para imagen ampliada */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 5px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #ccc;
+        }
+        
+        .modal-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .product-item {
+                flex-direction: column;
+            }
+            
+            .product-image {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+            
+            .product-actions {
+                flex-direction: row;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+            
+            .modal-content {
+                max-width: 95%;
+                max-height: 80%;
+            }
+            
+            .close {
+                top: 10px;
+                right: 15px;
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Gestión de Productos para Motos</h1>
+            <p class="subtitle">Agrega y gestiona productos con nombre, código, tipo de moto, modelos compatibles e imagen</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="form-section">
+                <h2>Agregar Nuevo Producto</h2>
+                <form id="product-form">
+                    <div class="form-group">
+                        <label for="product-name">Nombre del Producto</label>
+                        <input type="text" id="product-name" placeholder="Ej: Filtro de aceite" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-code">Código del Producto</label>
+                        <input type="text" id="product-code" placeholder="Ej: FLT-001" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-moto">Marca de la moto</label>
+                        <select id="product-moto" required>
+                            <option value="">Selecciona una marca</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Yamaha">Yamaha</option>
+                            <option value="Suzuki">Suzuki</option>
+                            <option value="Kawasaki">Kawasaki</option>
+                            <option value="Ducati">Ducati</option>
+                            <option value="BMW">BMW</option>
+                            <option value="KTM">KTM</option>
+                            <option value="Harley-Davidson">Harley-Davidson</option>
+                            <option value="Otra">Otra marca</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="other-moto-container" style="display: none;">
+                        <label for="other-moto">Especificar marca</label>
+                        <input type="text" id="other-moto" placeholder="Ingresa la marca de la moto">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-models">Modelos compatibles</label>
+                        <textarea id="product-models" placeholder="Ingresa los modelos de moto compatibles, separados por coma. Ej: CBR 600RR, CBR 1000RR, CB 500F" required></textarea>
+                        <div class="models-hint">Separa cada modelo con una coma. Puedes agregar tantos modelos como necesites.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-image">URL de la imagen del producto</label>
+                        <input type="url" id="product-image" placeholder="https://ejemplo.com/imagen.jpg">
+                        <img id="image-preview" class="image-preview" alt="Vista previa de la imagen">
+                    </div>
+                    
+                    <button type="submit">Agregar Producto</button>
+                </form>
+            </section>
+            
+            <section class="list-section">
+                <h2>Lista de Productos</h2>
+                
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Buscar productos...">
+                </div>
+                
+                <div class="product-list" id="product-list">
+                    <div class="empty-message" id="empty-message">
+                        No hay productos agregados todavía. ¡Agrega el primero!
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Modal para imagen ampliada -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div class="modal-caption" id="modalCaption"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productForm = document.getElementById('product-form');
+            const productList = document.getElementById('product-list');
+            const emptyMessage = document.getElementById('empty-message');
+            const searchInput = document.getElementById('search-input');
+            const productMoto = document.getElementById('product-moto');
+            const otherMotoContainer = document.getElementById('other-moto-container');
+            const productImageInput = document.getElementById('product-image');
+            const imagePreview = document.getElementById('image-preview');
+            
+            // Elementos del modal
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            const closeBtn = document.getElementsByClassName('close')[0];
+            
+            let products = JSON.parse(localStorage.getItem('motoProducts')) || [];
+            
+            // Mostrar/ocultar campo para otra moto
+            productMoto.addEventListener('change', function() {
+                if (this.value === 'Otra') {
+                    otherMotoContainer.style.display = 'block';
+                } else {
+                    otherMotoContainer.style.display = 'none';
+                }
+            });
+            
+            // Vista previa de imagen desde URL
+            productImageInput.addEventListener('input', function() {
+                const imageUrl = this.value.trim();
+                if (imageUrl) {
+                    imagePreview.src = imageUrl;
+                    imagePreview.classList.add('active');
+                } else {
+                    imagePreview.classList.remove('active');
+                }
+            });
+            
+            // Agregar producto
+            productForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('product-name').value;
+                const code = document.getElementById('product-code').value;
+                let moto = document.getElementById('product-moto').value;
+                const models = document.getElementById('product-models').value;
+                const imageUrl = document.getElementById('product-image').value;
+                
+                if (moto === 'Otra') {
+                    moto = document.getElementById('other-moto').value || 'Otra marca';
+                }
+                
+                // Verificar si el código ya existe
+                if (products.some(product => product.code === code)) {
+                    alert('Ya existe un producto con ese código. Por favor, usa un código único.');
+                    return;
+                }
+                
+                const product = {
+                    id: Date.now(),
+                    name,
+                    code,
+                    moto,
+                    models,
+                    imageUrl: imageUrl || 'https://via.placeholder.com/120x120?text=Sin+imagen'
+                };
+                
+                products.push(product);
+                saveProducts();
+                renderProducts();
+                productForm.reset();
+                otherMotoContainer.style.display = 'none';
+                imagePreview.classList.remove('active');
+                
+                alert('Producto agregado exitosamente!');
+            });
+            
+            // Buscar productos
+            searchInput.addEventListener('input', function() {
+                renderProducts();
+            });
+            
+            // Eliminar producto
+            function deleteProduct(id) {
+                if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                    products = products.filter(product => product.id !== id);
+                    saveProducts();
+                    renderProducts();
+                }
+            }
+            
+            // Guardar productos en localStorage
+            function saveProducts() {
+                localStorage.setItem('motoProducts', JSON.stringify(products));
+            }
+            
+            // Función para mostrar imagen en modal
+            function showImageInModal(imageSrc, productName) {
+                modal.style.display = 'block';
+                modalImage.src = imageSrc;
+                modalCaption.textContent = productName;
+            }
+            
+            // Cerrar modal al hacer clic en la X
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Cerrar modal al hacer clic fuera de la imagen
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Cerrar modal con tecla Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Renderizar productos
+            function renderProducts() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.code.toLowerCase().includes(searchTerm) ||
+                    product.moto.toLowerCase().includes(searchTerm) ||
+                    product.models.toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredProducts.length === 0) {
+                    productList.innerHTML = '';
+                    emptyMessage.style.display = 'block';
+                    productList.appendChild(emptyMessage);
+                    return;
+                }
+                
+                emptyMessage.style.display = 'none';
+                productList.innerHTML = '';
+                
+                filteredProducts.forEach(product => {
+                    const productItem = document.createElement('div');
+                    productItem.className = 'product-item';
+                    
+                    const imageSrc = product.imageUrl || 'https://via.placeholder.com/120x120?text=Sin+imagen';
+                    
+                    productItem.innerHTML = `
+                        <img src="${imageSrc}" alt="${product.name}" class="product-image" 
+                             onclick="showImageInModal('${imageSrc}', '${product.name}')" 
+                             onerror="this.src='https://via.placeholder.com/120x120?text=Error+imagen'">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-details">
+                                Código: ${product.code} | Marca: ${product.moto}
+                            </div>
+                            <div class="product-models">
+                                Modelos: ${product.models}
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-delete" onclick="deleteProduct(${product.id})">Eliminar</button>
+                        </div>
+                    `;
+                    productList.appendChild(productItem);
+                });
+            }
+            
+            // Hacer las funciones globales para que funcionen en los onclick
+            window.deleteProduct = deleteProduct;
+            window.showImageInModal = showImageInModal;
+            
+            // Renderizar productos al cargar la página
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
